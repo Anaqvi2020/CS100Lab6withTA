@@ -38,4 +38,111 @@ public:
     virtual bool select(const std::string& s) const = 0;
 };
 
+class Select_And: public Select
+{
+    public:
+    Select* first;
+    Select* second;
+    Select_And(Select* select1, Select* select2)
+    {
+        first = select1;
+        second = select2;
+    }
+    ~Select_And()
+    {
+    delete first;
+    delete second;
+    }
+    virtual bool select(const Spreadsheet* sheet, int row)
+    {
+        if ((first->select(sheet, row)==true) && (second->select(sheet, row)==true))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+};
+
+class Select_Contains: public Select_Column
+{
+    public:
+    std::string data;
+
+    Select_Contains(const Spreadsheet* sheet, const std::string columnName, const std::string item):Select_Column(sheet, columnName)
+    {
+        data = item;
+    }
+    ~Select_Contains()
+    {}
+    virtual bool select(const std::string& s) const
+    {
+        if ( s.find(data) != std::string::npos)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+};
+
+class Select_Not: public Select
+{
+    public:
+    Select* argument;
+    Select_Not(Select* input)
+    {
+        argument = input;
+    }
+    ~Select_Not()
+     {
+      delete argument;
+     }
+
+    virtual bool select(const Spreadsheet* sheet, int row)
+    {
+        if (argument->select(sheet, row) == false)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+};
+
+class Select_Or: public Select
+{
+    public:
+    Select* first;
+    Select* second;
+    Select_Or(Select* select1, Select* select2)
+    {
+        first = select1;
+        second = select2;
+    }
+    ~Select_Or()
+     {
+      delete first;
+      delete second;
+     }
+
+    virtual bool select(const Spreadsheet* sheet, int row)
+    {
+        if ((first->select(sheet, row)==true) || (second->select(sheet, row)==true))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+};
 #endif //__SELECT_HPP__
